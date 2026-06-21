@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.venv/
+venv/
+
+# 本地真实配置可能包含订阅 token，默认不提交。
+config.yaml
+
+# 本地运行或调试产物。
+*.log
+*.tmp

@@ -1,0 +1,97 @@
+# Clash Sub Server 示例配置
+# 使用方法：
+# 1. 复制本文件为 config.yaml
+# 2. 修改 tokens 下的 token 和 source
+# 3. 如需让订阅源拉取走 Mihomo/Clash，开启 proxy.enabled
+
+server:
+  # Waitress 监听地址。反向代理部署时建议保持 127.0.0.1。
+  # 修改 host/port 后需要重启服务才会改变监听端口。
+  host: 127.0.0.1
+  port: 2233
+
+  # 如果前面有 Nginx/OpenResty，只信任本机代理传来的 X-Forwarded-*。
+  trusted_proxy: 127.0.0.1
+  trusted_proxy_count: 1
+  trusted_proxy_headers:
+    - x-forwarded-for
+    - x-forwarded-host
+    - x-forwarded-port
+    - x-forwarded-proto
+
+routes:
+  # 可访问订阅的路径。比如 /c-sub?token=your_token
+  subscription_paths:
+    - /
+    - /c-sub
+
+hot_reload:
+  # 开启后，config.yaml 和 rules/commercial_rules.list 变更会在下一次请求自动生效。
+  # 如果新配置写错，程序会保留上一份有效配置继续服务。
+  enabled: true
+
+source_request:
+  # 建立 TCP/TLS 连接最多等待多少秒。
+  connect_timeout: 5
+  # 连接建立后，单次读取响应最多等待多少秒。
+  read_timeout: 25
+  # 多源并发拉取的整体等待上限；超过后慢源会被视为失败源。
+  overall_timeout: 30
+  # 多源并发 worker 数，会自动限制为 source 数量。
+  max_workers: 4
+  # false：多源任意一个失败就返回错误。
+  # true：多源部分失败时继续使用成功源。
+  allow_partial_failure: false
+  # 发送给上游订阅源的 User-Agent。
+  user_agent: clash-verge/v2.5.1
+
+proxy:
+  # 只影响远程订阅源拉取；本地 YAML source 不走代理。
+  enabled: false
+  # 如果你的 Mihomo/Clash 监听在本机 7890，可以改成 true 并保留下面两行。
+  http: http://127.0.0.1:7890
+  https: http://127.0.0.1:7890
+  no_proxy:
+    - localhost
+    - 127.0.0.1
+    - ::1
+
+response:
+  # 返回给客户端的更新间隔，单位小时。
+  profile_update_interval: "1"
+  mimetype: text/yaml; charset=utf-8
+
+rules:
+  # 商业规则文件：一行一条，程序原样读取，不排序、不去重。
+  # 以 # 开头的行是维护注释，程序读取规则时会自动忽略。
+  commercial_rules_path: rules/commercial_rules.list
+
+# ==========================================
+# 用户配置区
+# 访问格式为: http://你的IP:2233/c-sub?token=密钥
+# 可用访问路径由 routes.subscription_paths 配置决定。
+# ==========================================
+# 访问密钥配置映射
+# 每个 token 都是独立配置项，需包含:
+# - source: 订阅源 (支持 URL 或本地路径)
+#     - 单源: "https://example.com/sub" 或 "./local.yaml"
+#     - 多源: ["https://example.com/sub1", "./local.yaml"]
+#     - 多源带标签: [{"ref": "./local.yaml", "tag": "local"}, {"ref": "https://example.com/sub2", "tag": "backup"}]
+# - userinfo_mode:
+#     - "source": 使用源站返回的 Subscription-Userinfo（若源站无此头部，则不返回该头）
+#     - "custom": 使用本项 subscription_userinfo 的固定值
+# - subscription_userinfo: 仅当 userinfo_mode="custom" 时生效
+# ==========================================
+tokens:
+  # token 名就是访问参数：/c-sub?token=example_token
+  example_token:
+    # source 支持字符串、字符串列表、或带 ref/tag 的对象列表。
+    source:
+      - ref: https://example.com/subscription.yaml
+        tag: source1
+      - ref: ./local-subscription.yaml
+        tag: local
+
+    # source：使用上游 Subscription-Userinfo；custom：使用下面的固定值。
+    userinfo_mode: custom
+    subscription_userinfo: "upload=0; download=0; total=1099511627776; expire=253402185600"
