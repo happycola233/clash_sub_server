@@ -1,0 +1,11 @@
+# 固定保留 Clash 客户端使用的 9 个出口 IP 检测接口，不随上游名单扩展。
+# 由 sources.yaml 统一分配到「IP 检测」。
+DOMAIN-SUFFIX,ip.sb
+DOMAIN-SUFFIX,ipapi.co
+DOMAIN-SUFFIX,api.ipapi.is
+DOMAIN-SUFFIX,ipwho.is
+DOMAIN-SUFFIX,ip.api.skk.moe
+DOMAIN-SUFFIX,api.myip.com
+DOMAIN-SUFFIX,ident.me
+DOMAIN-SUFFIX,ip-api.com
+DOMAIN-SUFFIX,ipinfo.io

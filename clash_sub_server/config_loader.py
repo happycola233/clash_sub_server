@@ -2,7 +2,7 @@
 
 设计原则：
 1. 配置文件出错时，不覆盖上一份已经生效的配置。
-2. 热重载只在请求进入时做轻量 mtime 检查，不额外起后台线程。
+2. 热重载通过轻量 mtime 检查完成；规则下载由独立的服务内更新线程负责。
 3. 规则文件作为配置的一部分一起纳入热重载。
 """
 
@@ -11,6 +11,7 @@ from __future__ import annotations
 import os
 import threading
 import logging
+from dataclasses import replace
 from pathlib import Path
 from typing import Any, Mapping
 
@@ -87,6 +88,25 @@ class ConfigManager:
 
         with self._lock:
             return self._load_or_raise()
+
+    def install_commercial_rules(self, expected: RulesSettings, text: str) -> bool | None:
+        """发布后台生成的规则；配置已改变时放弃结果，不覆盖新的输出位置。"""
+
+        from .rule_updater import replace_output
+
+        rules = tuple(line.strip() for line in text.splitlines() if line.strip() and not line.lstrip().startswith("#"))
+        if not rules:
+            raise ConfigError("自动更新生成的商业规则为空")
+        with self._lock:
+            config = self.get_config()
+            if config.rules != expected or not config.rules.auto_update:
+                return None
+            changed = replace_output(expected.commercial_rules_path, text)
+            # 即使关闭了文件热重载，服务自身下载成功的规则也立即供下一次请求使用。
+            self._config = replace(config, commercial_rules=rules)
+            if self._signature is not None:
+                self._signature = (self._signature[0], _file_signature(expected.commercial_rules_path))
+            return changed
 
     def _load_or_raise(self) -> AppConfig:
         try:
@@ -214,7 +234,20 @@ def _parse_rules(value: Any, base_dir: Path) -> RulesSettings:
     path = Path(raw_path).expanduser()
     if not path.is_absolute():
         path = base_dir / path
-    return RulesSettings(commercial_rules_path=path.resolve())
+    path = path.resolve()
+    raw_sources = _as_str(data.get("sources_path", str(path.with_name("sources.yaml"))), "rules.sources_path")
+    sources_path = Path(raw_sources).expanduser()
+    if not sources_path.is_absolute():
+        sources_path = base_dir / sources_path
+    interval = _as_int(data.get("update_interval", 86400), "rules.update_interval")
+    if interval <= 0:
+        raise ConfigError("rules.update_interval 必须大于 0")
+    return RulesSettings(
+        commercial_rules_path=path,
+        sources_path=sources_path.resolve(),
+        auto_update=_as_bool(data.get("auto_update", True), "rules.auto_update"),
+        update_interval=interval,
+    )
 
 
 def _parse_tokens(value: Any) -> Mapping[str, TokenConfig]:

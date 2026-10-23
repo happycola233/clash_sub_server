@@ -7,6 +7,7 @@ from werkzeug.exceptions import HTTPException
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 import logging
+import atexit
 
 from .config_loader import ConfigManager
 from .errors import AllSourcesFailedError, ConfigError, SourceError, SubscriptionFormatError
@@ -14,6 +15,7 @@ from .fetcher import format_source_refs, load_merged_source_config
 from .logging_config import configure_logging
 from .parser import validate_proxy_list
 from .renderer import build_final_config, dump_yaml
+from .rule_update_service import RuleUpdateService
 from .userinfo import choose_response_userinfo, describe_userinfo_header_mode
 
 logger = logging.getLogger(__name__)
@@ -31,6 +33,10 @@ def create_app(config_manager: ConfigManager | None = None) -> Flask:
     configure_logging()
     app = Flask(__name__)
     app.config["CONFIG_MANAGER"] = manager
+    rule_updates = RuleUpdateService(manager)
+    app.extensions["rule_update_service"] = rule_updates
+    rule_updates.start()
+    atexit.register(rule_updates.stop)
 
     # 信任一层反向代理，恢复真实客户端 IP、协议和 Host。
     app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=0)

@@ -60,9 +60,9 @@ class SourceRequestSettings:
 
 @dataclass(frozen=True)
 class ProxySettings:
-    """远程订阅源代理设置。
+    """远程订阅源与规则下载的代理设置。
 
-    这里的代理只作用于远程 source 拉取。本地 YAML 文件读取不走代理。
+    本地文件读取不走代理。
     """
 
     enabled: bool = False
@@ -81,9 +81,12 @@ class ResponseSettings:
 
 @dataclass(frozen=True)
 class RulesSettings:
-    """商业规则文件位置。"""
+    """商业规则文件与服务内自动更新设置。"""
 
     commercial_rules_path: Path
+    sources_path: Path | None = None
+    auto_update: bool = True
+    update_interval: int = 86400
 
 
 @dataclass(frozen=True)
