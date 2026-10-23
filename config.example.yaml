@@ -2,7 +2,7 @@
 # 使用方法：
 # 1. 复制本文件为 config.yaml
 # 2. 修改 tokens 下的 token 和 source
-# 3. 如需让订阅源和规则下载走 Mihomo/Clash，开启 proxy.enabled
+# 3. 如需让订阅源下载走 Mihomo/Clash，开启 proxy.enabled
 
 server:
   # Waitress 监听地址。反向代理部署时建议保持 127.0.0.1。
@@ -46,7 +46,7 @@ source_request:
   user_agent: clash-verge/v2.5.1
 
 proxy:
-  # 用于远程订阅源与规则下载；本地文件不走代理。
+  # 用于远程订阅源下载；本地文件不走代理。
   enabled: false
   # 如果你的 Mihomo/Clash 监听在本机 7890，可以改成 true 并保留下面两行。
   http: http://127.0.0.1:7890
@@ -62,15 +62,9 @@ response:
   mimetype: text/yaml; charset=utf-8
 
 rules:
-  # 商业规则文件：一行一条，程序原样读取，不排序、不去重。
+  # 商业分流规则：GEOSITE/GEOIP 引用及固定 IP 检测域名，一行一条。
   # 以 # 开头的行是维护注释，程序读取规则时会自动忽略。
   commercial_rules_path: rules/commercial_rules.list
-  # 服务启动后在后台更新，此后默认每天更新；失败保留旧规则，1 小时后重试。
-  # 旧配置未填写这些选项时，也默认启用，无须另设定时任务。
-  auto_update: true
-  update_interval: 86400
-  # 相对路径从 config.yaml 所在目录解析；省略时默认在规则文件旁找 sources.yaml。
-  sources_path: rules/sources.yaml
 
 # ==========================================
 # 用户配置区

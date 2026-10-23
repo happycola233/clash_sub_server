@@ -66,6 +66,17 @@ def build_final_config(proxies: list[dict[str, Any]], commercial_rules: tuple[st
         "mode": "rule",
         "log-level": "info",
         "ipv6": False,
+        "find-process-mode": "strict",
+        # 服务 IP 分组使用 geoip.dat；数据库下载与更新交给客户端内核。
+        "geodata-mode": True,
+        "geo-auto-update": True,
+        "geo-update-interval": 24,
+        "geox-url": {
+            "geoip": "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat",
+            "geosite": "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat",
+            "mmdb": "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.metadb",
+            "asn": "https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb",
+        },
         "external-controller": "127.0.0.1:9090",
         "tun": {
             "enable": True,
@@ -130,9 +141,14 @@ def build_final_config(proxies: list[dict[str, Any]], commercial_rules: tuple[st
             "applications": {"type": "http", "behavior": "classical", "url": "https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt", "path": "./ruleset/applications.yaml", "interval": 86400},
         },
         "rules": [
-            "AND,((NETWORK,UDP),(DST-PORT,443)),REJECT",
+            # 屏蔽 QUIC：静默丢弃发往 UDP 443 端口的流量。
+            "AND,((NETWORK,UDP),(DST-PORT,443)),REJECT-DROP",
             # 广告先于服务规则匹配，避免被 Google、Microsoft 等主名单抢先命中。
             "RULE-SET,ads,广告",
+            # BT/PT 站点和下载进程先于服务、通用代理规则直连。
+            "GEOSITE,category-public-tracker,DIRECT",
+            "GEOSITE,category-pt,DIRECT",
+            r"PROCESS-NAME-REGEX,(?i)^(qbittorrent(-nox)?|transmission.*|deluge.*|aria2c?|motrix|utorrent|bitcomet(_x64)?)(\.exe)?$,DIRECT",
         ]
         + list(commercial_rules)
         + [
