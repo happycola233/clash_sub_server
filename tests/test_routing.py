@@ -105,4 +105,4 @@ class RoutingTests(unittest.TestCase):
         self.assertEqual(self.config["geo-update-interval"], 24)
         for kind in ["geoip", "geosite"]:
             self.assertEqual(self.config["geox-url"][kind],
-                             f"https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/{kind}.dat")
+                             f"https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/{kind}.dat")

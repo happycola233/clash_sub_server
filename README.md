@@ -144,12 +144,13 @@ geodata-mode: true
 geo-auto-update: true
 geo-update-interval: 24  # 小时
 geox-url:
-  geoip: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.dat
-  geosite: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geosite.dat
-  mmdb: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/geoip.metadb
-  asn: https://github.com/MetaCubeX/meta-rules-dat/releases/download/latest/GeoLite2-ASN.mmdb
+  geoip: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.dat
+  geosite: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geosite.dat
+  mmdb: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/geoip.metadb
+  asn: https://testingcf.jsdelivr.net/gh/MetaCubeX/meta-rules-dat@release/GeoLite2-ASN.mmdb
 ```
 
+数据库使用 MetaCubeX 提供的 jsDelivr Cloudflare 下载地址。
 域名使用 `geosite.dat`，服务 IP 分组使用 `geoip.dat`。数据库下载、定时更新由客户端内核负责，
 服务端只维护分流映射。无需额外命令或定时任务；数据库更新也不需要重新获取订阅。
 如果客户端的全局设置覆盖订阅配置，应以实际生效的配置为准。
