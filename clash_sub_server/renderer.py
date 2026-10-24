@@ -28,7 +28,8 @@ def build_final_config(proxies: list[dict[str, Any]], commercial_rules: tuple[st
         {"name": "节点选择", "type": "select", "proxies": ["自动选择", "全球直连", "故障转移"] + proxy_names},
         {"name": "自动选择", "type": "url-test", "proxies": pure_nodes, "url": "http://cp.cloudflare.com/generate_204", "interval": 300},
         {"name": "故障转移", "type": "fallback", "proxies": pure_nodes, "url": "http://cp.cloudflare.com/generate_204", "interval": 300},
-        {"name": "全球直连", "type": "select", "proxies": ["DIRECT"] + proxy_names},
+        # 供其他分组和规则引用的固定直连入口。
+        {"name": "全球直连", "type": "select", "proxies": ["DIRECT"]},
         {"name": "广告", "type": "select", "proxies": ["REJECT", "DIRECT", "节点选择"]},
         {"name": "漏网之鱼", "type": "select", "proxies": full_proxies},
         {"name": "NETFLIX", "type": "select", "proxies": full_proxies, "icon": "https://cdn.jsdelivr.net/gh/happycola233/assets@v1.4/group-icons/netflix.svg"},
