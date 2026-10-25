@@ -58,7 +58,7 @@ proxy:
 
 response:
   # 返回给客户端的更新间隔，单位小时。
-  profile_update_interval: "1"
+  profile_update_interval: "24"
   mimetype: text/yaml; charset=utf-8
 
 rules:

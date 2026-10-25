@@ -203,7 +203,7 @@ def _parse_proxy(value: Any) -> ProxySettings:
 def _parse_response(value: Any) -> ResponseSettings:
     data = _optional_mapping(value, "response")
     return ResponseSettings(
-        profile_update_interval=_as_str(data.get("profile_update_interval", "1"), "response.profile_update_interval"),
+        profile_update_interval=_as_str(data.get("profile_update_interval", "24"), "response.profile_update_interval"),
         mimetype=_as_str(data.get("mimetype", "text/yaml; charset=utf-8"), "response.mimetype"),
     )
 

@@ -75,7 +75,7 @@ class ProxySettings:
 class ResponseSettings:
     """订阅响应头和 MIME 类型设置。"""
 
-    profile_update_interval: str = "1"
+    profile_update_interval: str = "24"
     mimetype: str = "text/yaml; charset=utf-8"
 
 
