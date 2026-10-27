@@ -61,8 +61,7 @@ class RoutingTests(unittest.TestCase):
         rules = self.config["rules"]
         process_rules = [rule for rule in rules if rule.startswith("PROCESS-NAME-REGEX,")]
         self.assertEqual(len(process_rules), 1)
-        bt_rules = ["GEOSITE,category-public-tracker,DIRECT", "GEOSITE,category-pt,DIRECT", *process_rules]
-        for rule in bt_rules:
+        for rule in process_rules:
             self.assertTrue(rule.endswith(",DIRECT"))
             self.assertLess(rules.index(rule), rules.index(self.rules[0]))
             self.assertLess(rules.index(rule), rules.index("RULE-SET,proxy,节点选择"))

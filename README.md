@@ -171,15 +171,13 @@ geox-url:
 - Netflix、Telegram 和 X 的 IP 名单位于域名规则之后，附加 `no-resolve`，不为 IP 匹配额外触发 DNS 查询。
 - iCloud、Apple、Google、Telegram IP 已改由上述名单负责，不再重复接入旧的四个 provider。
 
-BT 直连规则位于服务分流和通用代理规则之前（现有 UDP 443 拦截、广告规则仍优先）：
+BT 下载进程直连规则位于服务分流和通用代理规则之前（现有 UDP 443 拦截、广告规则仍优先）：
 
 ```yaml
-- GEOSITE,category-public-tracker,DIRECT
-- GEOSITE,category-pt,DIRECT
 - PROCESS-NAME-REGEX,(?i)^(qbittorrent(-nox)?|transmission.*|deluge.*|aria2c?|motrix|utorrent|bitcomet(_x64)?)(\.exe)?$,DIRECT
 ```
 
-PT 名单也会让浏览器访问对应站点时直连；进程规则会直连这些下载器的全部流量，
+进程规则会直连这些下载器的全部流量，
 包括 aria2、Motrix 的普通 HTTP 下载。进程匹配适用于内核能够识别的本机进程，无法识别其他设备的进程。
 
 修改分流映射后，客户端仍需刷新订阅。

@@ -146,9 +146,7 @@ def build_final_config(proxies: list[dict[str, Any]], commercial_rules: tuple[st
             "AND,((NETWORK,UDP),(DST-PORT,443)),REJECT-DROP",
             # 广告先于服务规则匹配，避免被 Google、Microsoft 等主名单抢先命中。
             "RULE-SET,ads,广告",
-            # BT/PT 站点和下载进程先于服务、通用代理规则直连。
-            "GEOSITE,category-public-tracker,DIRECT",
-            "GEOSITE,category-pt,DIRECT",
+            # BT/PT 下载进程先于服务、通用代理规则直连。
             r"PROCESS-NAME-REGEX,(?i)^(qbittorrent(-nox)?|transmission.*|deluge.*|aria2c?|motrix|utorrent|bitcomet(_x64)?)(\.exe)?$,DIRECT",
         ]
         + list(commercial_rules)

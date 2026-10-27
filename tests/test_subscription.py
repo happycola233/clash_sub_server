@@ -46,7 +46,6 @@ class SubscriptionTests(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         rendered = yaml.safe_load(response.get_data(as_text=True))
         self.assertIn("GEOSITE,netflix,NETFLIX", rendered["rules"])
-        self.assertIn("GEOSITE,category-pt,DIRECT", rendered["rules"])
         self.assertTrue(rendered["geo-auto-update"])
         self.assertEqual(self.rules_path.read_text(encoding="utf-8"), self.original_rules)
 
