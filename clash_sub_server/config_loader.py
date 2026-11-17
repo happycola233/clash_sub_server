@@ -185,7 +185,7 @@ def _parse_source_request(value: Any) -> SourceRequestSettings:
         read_timeout=_as_float(data.get("read_timeout", 25), "source_request.read_timeout"),
         overall_timeout=_as_float(data.get("overall_timeout", 30), "source_request.overall_timeout"),
         max_workers=max(1, _as_int(data.get("max_workers", 4), "source_request.max_workers")),
-        user_agent=_as_str(data.get("user_agent", "clash-verge/v2.5.1"), "source_request.user_agent"),
+        user_agent=_as_str(data.get("user_agent", "clash-verge/v2.5.10"), "source_request.user_agent"),
         allow_partial_failure=_as_bool(data.get("allow_partial_failure", False), "source_request.allow_partial_failure"),
     )
 

@@ -54,7 +54,7 @@ class SourceRequestSettings:
     read_timeout: float = 25.0
     overall_timeout: float = 30.0
     max_workers: int = 4
-    user_agent: str = "clash-verge/v2.5.1"
+    user_agent: str = "clash-verge/v2.5.10"
     allow_partial_failure: bool = False
 
 

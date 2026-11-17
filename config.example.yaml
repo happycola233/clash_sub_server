@@ -43,7 +43,7 @@ source_request:
   # true：多源部分失败时继续使用成功源。
   allow_partial_failure: false
   # 发送给上游订阅源的 User-Agent。
-  user_agent: clash-verge/v2.5.1
+  user_agent: clash-verge/v2.5.10
 
 proxy:
   # 用于远程订阅源下载；本地文件不走代理。
