@@ -3,6 +3,8 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
+from requests import Response
+from requests.utils import get_encoding_from_headers
 import yaml
 
 from clash_sub_server.app import create_app
@@ -48,6 +50,28 @@ class SubscriptionTests(unittest.TestCase):
         self.assertIn("GEOSITE,netflix,NETFLIX", rendered["rules"])
         self.assertTrue(rendered["geo-auto-update"])
         self.assertEqual(self.rules_path.read_text(encoding="utf-8"), self.original_rules)
+
+    def test_utf8_remote_source_works_in_strict_multi_source_subscription(self):
+        config_path = self.manager.config_path
+        config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+        config["source_request"] = {"allow_partial_failure": False}
+        config["tokens"]["test-token"]["source"] = ["https://example.test/sub", "nodes.yaml"]
+        config_path.write_text(yaml.safe_dump(config), encoding="utf-8")
+        upstream = Response()
+        upstream.status_code = 200
+        upstream.headers["Content-Type"] = "text/yaml"
+        upstream._content = yaml.safe_dump({"proxies": [{
+            "name": "日本节点", "type": "ss", "server": "example.test", "port": 443,
+            "cipher": "aes-128-gcm", "password": "test-only",
+        }]}, allow_unicode=True).encode("utf-8")
+        upstream.encoding = get_encoding_from_headers(upstream.headers)
+        app = create_app(self.manager)
+        with patch("clash_sub_server.fetcher.requests.get", return_value=upstream):
+            with app.test_client() as client:
+                response = client.get("/c-sub?token=test-token")
+        self.assertEqual(response.status_code, 200)
+        rendered = yaml.safe_load(response.get_data(as_text=True))
+        self.assertEqual([proxy["name"] for proxy in rendered["proxies"]], ["日本节点", "test-node"])
 
     def test_local_rule_mapping_changes_hot_reload_and_invalid_files_keep_previous_rules(self):
         app = create_app(self.manager)

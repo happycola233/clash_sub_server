@@ -13,6 +13,7 @@ import os
 import time
 from concurrent.futures import Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass
+from email.message import Message
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -131,7 +132,8 @@ def _load_remote_source(
     )
     source_resp.raise_for_status()
 
-    source_config, parse_mode = parse_source_yaml(source_resp.text, source_ref)
+    source_text = _decode_source_response(source_resp)
+    source_config, parse_mode = parse_source_yaml(source_text, source_ref)
     remote_userinfo = source_resp.headers.get("Subscription-Userinfo")
     elapsed_ms = int((time.time() - start_time) * 1000)
     proxies = source_config.get("proxies")
@@ -147,6 +149,26 @@ def _load_remote_source(
         proxy_count,
     )
     return SourceLoadResult(source_config=source_config, remote_userinfo=remote_userinfo)
+
+
+def _decode_source_response(response: requests.Response) -> str:
+    """区分显式 charset 和 Requests 对 text/* 默认使用的 Latin-1 编码。"""
+
+    content_type = Message()
+    content_type["Content-Type"] = response.headers.get("Content-Type", "")
+    encoding = content_type.get_content_charset()
+    if not encoding:
+        try:
+            return response.content.decode("utf-8-sig")
+        except UnicodeDecodeError as exc:
+            encoding = response.apparent_encoding
+            if not encoding:
+                raise SourceError("订阅源响应编码无法识别") from exc
+
+    try:
+        return response.content.decode(encoding)
+    except (LookupError, UnicodeDecodeError) as exc:
+        raise SourceError(f"订阅源响应无法按 {encoding} 解码") from exc
 
 
 def _load_local_source(source_ref: str, base_dir: Path) -> SourceLoadResult:
